@@ -1,32 +1,13 @@
 <?php
 
-/**
- * jquery: 85
- *
- * - ajax: 12 (core, ajax): 7
- * - attributes 19 (core, callbacks, support, attributes): 5
- * - callbacks: 9 (core, callbacks): 4
- * - core: 5
- * - css 18 (core, callbacks, support, css): 4
- * - data 12 (core, data): 7
- * - deferred 10 (core, deferred): 5
- * - dimensions 8 (core, dimensions) 3
- * - effects 21 (core, callbacks, support, effects): 7
- * - event 34 (core, callbacks, support, attributes, data, event) 8
- * - manipulation 13 (core, manipulation): 8
- * - offset 9 (core, offset): 4
- * - queue 10 (core, queue): 5
- * - support 14 (core, callbacks, support); 5
- * - traversing 11 (core, traversing): 6
- */
-
-
-
-
-
-$component = !empty($_GET['c']) ? $_GET['c'] : 'RAW';
-$samples = !empty($_GET['s']) ? $_GET['s'] : 20;
-$js = !empty($_GET['no_js']) && $_GET['no_js'] == 1 ? 0 : 1;
+// build query string for scripts.php
+function qs($comp) {
+  $s = array();
+  foreach ((array) $comp as $c) {
+    $s[] = "c[]=$c";
+  }
+  return $s;
+}
 
 function load($c) {
   $path = './jquery/' . $c . '.js';
@@ -36,28 +17,53 @@ function load($c) {
   return '';
 }
 
-// build query string for scripts.php
-$s = array();
-if ($component !== 'RAW') {
-  foreach ((array) $component as $c) {
-    $s[] = "c[]=$c";
-  }
-}
+
+$component = !empty($_GET['c']) ? $_GET['c'] : 'raw';
+$query = qs($component);
+$samples = !empty($_GET['s']) ? $_GET['s'] : 10;
+$js = !empty($_GET['no_js']) && $_GET['no_js'] == 1 ? 0 : 1;
+
+
+$tests = array(
+  'raw' => array('raw'),
+  'jquery' => array('jquery.min'),
+  'core' => array('core.min'),
+  'ajax' => array('core.min', 'ajax.min'),
+  'attributes' => array('core.min', 'callbacks.min', 'support.min', 'attributes.min'),
+  'callbacks' => array('core.min', 'callbacks.min'),
+  'css' => array('core.min', 'callbacks.min', 'support.min', 'css.min'),
+  'data' => array('core.min', 'data.min'),
+  'deferred' => array('core.min', 'deferred.min'),
+  'dimensions' => array('core.min', 'dimensions.min'),
+  'effects' => array('core.min', 'callbacks.min', 'support.min', 'effects.min'),
+  'event' => array('core.min', 'callbacks.min', 'support.min', 'attributes.min', 'data.min', 'event.min'),
+  'manipulation' => array('core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
+  'offset' => array('core.min', 'offset.min'),
+  'queue' => array('core.min', 'queue.min'),
+  'support' => array('core.min', 'callbacks.min', 'support.min'),
+  'traversing'  => array('core.min', 'traversing.min'),
+);
+
 
 ?><!doctype html>
 <html>
 <head>
   <meta charset="utf8">
   <title>jQuery perf rundown</title>
-  <?php if (!empty($s)): ?>
-  <script src="./scripts.php?<?php print implode("&", $s); ?>"></script>
+  <?php if (!empty($query) && $component !== 'raw'): ?>
+  <script src="./scripts.php?<?php print implode("&", $query); ?>"></script>
   <?php endif; ?>
 </head>
 <body style="text-align:center;">
-<a href="?">raw</a> |
-<a href="?c[]=jquery.min">jquery.min</a> |
-<a href="?c[]=core.min&c[]=callbacks.min&c[]=support.min&c[]=effects.min">effects.min</a> |
-<a href="?c[]=core.min&c[]=manipulation.min">manipulation.min</a>
+
+<?php
+  $links = array();
+  foreach ($tests as $id => $t) {
+    $links[] = '<a id="'. $id .'" href="?' . implode('&', qs($t)) . '">' . $id . '</a>';
+  }
+  print implode(' | ', $links);
+  ?>
+
 <div id="log" style="text-align:center;font-size:100px;font:georgia;margin:50px"><h2>…</h2></div>
 <script><?php print str_replace(
   array('"$component$"', '"$js$"', '"$samples$"'),

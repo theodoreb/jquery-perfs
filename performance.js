@@ -10,7 +10,7 @@ if (window['performance']) {
         perf = window['performance'],
         timing = perf.timing,
         domLoading = timing.domLoading,
-        oldRaw = JSON.parse(localStorage.getItem('RAW')) || [],
+        oldRaw = JSON.parse(localStorage.getItem('raw')) || [],
         oldC = JSON.parse(localStorage.getItem(c)) || [],
         get = [
           /*'domLoading',*/ 'domInteractive', 'domContentLoadedEventStart', 'domContentLoadedEventEnd', 'domComplete'
@@ -30,15 +30,17 @@ if (window['performance']) {
       function print (el, data) {
         var filC = oldC.filter(excludeMobile);
         var filRaw = oldRaw.filter(excludeMobile);
+        var excluded = oldC.length - filC.length;
         el.innerHTML = [
           '<h2 style="font-size:50px">', c.join(', ') , '</h2>',
           '<ul style="list-style:none;margin:0;padding:0;">',
             //'<li>', data.domContentLoadedEventEnd - data.domContentLoadedEventStart, '&thinsp;ms</li>',
             //'<li>', data.domComplete - data.domContentLoadedEventStart, '&thinsp;ms</li>',
             '<li style="color:gray">', data.domComplete, '&thinsp;ms</li>',
-            '<li>', (filRaw.length && filC.length) ?
-              Math.round(filC.reduce(sum) / filC.length - filRaw.reduce(sum) / filRaw.length) + '&thinsp;ms' :
-              'N/A', '</li>',
+            '<li>',
+              (filRaw.length && filC.length) ? Math.round(filC.reduce(sum) / filC.length - filRaw.reduce(sum) / filRaw.length) + '&thinsp;ms' : 'N/A',
+              (excluded > 0 ? '<br/><small style="font-size:12px!important;color:gray;">excluded: ' + excluded + '</small>' : ''),
+            '</li>',
             //'<li><button type="button" onclick="window.location.reload();" style="font-weight:bold;font-size:20px;">RELOAD</button></li>',
           '</ul>',
           '<p style="font-size:15px">' +
@@ -55,7 +57,7 @@ if (window['performance']) {
 
       oldC.push(data.domComplete);
       json = JSON.stringify(oldC);
-      localStorage.setItem(c.join(',') || 'RAW', json);
+      localStorage.setItem(c.join(',') || 'raw', json);
 
       if (oldC.length > minData) {
         var log = document.getElementById('log');
@@ -64,7 +66,8 @@ if (window['performance']) {
       else {
         // reload until we get 100 data points.
         setTimeout(function () {
-          window.location.reload();
+          var link = document.querySelector('a[href$="' + window.location.search.replace(/&r=.+$/, '') + '"]');
+          window.location = link.getAttribute('href') + '&r='+ Math.random();
         }, 500);
       }
       /*

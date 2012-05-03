@@ -17,6 +17,8 @@ function load($c) {
   return '';
 }
 
-foreach ((array) $component as $c) {
-  print "\n\n//$c\n" . load($c);
+if ($component !== 'raw') {
+  foreach ((array) $component as $c) {
+    print "\n\n//$c\n" . load($c);
+  }
 }
