@@ -35,18 +35,22 @@ function load($c) {
   return '';
 }
 
-
+// build query string for scripts.php
+$s = array();
+if ($component !== 'RAW') {
+  foreach ((array) $component as $c) {
+    $s[] = "c[]=$c";
+  }
+}
 
 ?><!doctype html>
 <html>
 <head>
   <meta charset="utf8">
   <title>jQuery perf rundown</title>
-  <script><?php
-    foreach ((array) $component as $c) {
-      print "\n\n//$c\n" . load($c);
-    }
-    ?></script>
+  <?php if (!empty($s)): ?>
+  <script src="./scripts.php?<?php print implode("&", $s); ?>"></script>
+  <?php endif; ?>
 </head>
 <body style="text-align:center;">
 <a href="?">raw</a> |

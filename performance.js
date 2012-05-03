@@ -3,6 +3,7 @@ if (window['performance']) {
     "use strict";
     setTimeout(function () {
       var
+        minData = 20,
         json, n, nl,
         c = "$component$",
         body = document.body,
@@ -28,7 +29,7 @@ if (window['performance']) {
             '<li>', (oldC.length && oldRaw.length) ?
               Math.round(oldC.reduce(sum) / oldC.length - oldRaw.reduce(sum) / oldRaw.length) + '&thinsp;ms' :
               'N/A', '</li>',
-            '<li><button type="button" onclick="window.location.reload();" style="font-weight:bold;font-size:20px;">RELOAD</button></li>',
+            //'<li><button type="button" onclick="window.location.reload();" style="font-weight:bold;font-size:20px;">RELOAD</button></li>',
           '</ul>',
           '<p style="font-size:15px">' +
             'Time in gray is the difference between domComplete and domLoading for this page<br/>' +
@@ -46,8 +47,16 @@ if (window['performance']) {
       json = JSON.stringify(oldC);
       localStorage.setItem(c.join(',') || 'RAW', json);
 
-      var log = document.getElementById('log');
-      print(log, data);
+      if (oldC.length > minData) {
+        var log = document.getElementById('log');
+        print(log, data);
+      }
+      else {
+        // reload until we get 100 data points.
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
+      }
       /*
        var xhr = new XMLHttpRequest();
        xhr.open("POST", 'log.php', true);
