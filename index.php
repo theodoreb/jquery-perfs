@@ -25,6 +25,7 @@
 
 
 $component = !empty($_GET['c']) ? $_GET['c'] : 'RAW';
+$samples = !empty($_GET['s']) ? $_GET['s'] : 20;
 $js = !empty($_GET['no_js']) && $_GET['no_js'] == 1 ? 0 : 1;
 
 function load($c) {
@@ -59,8 +60,8 @@ if ($component !== 'RAW') {
 <a href="?c[]=core.min&c[]=manipulation.min">manipulation.min</a>
 <div id="log" style="text-align:center;font-size:100px;font:georgia;margin:50px"><h2>…</h2></div>
 <script><?php print str_replace(
-  array('"$component$"', '"$js$"'),
-  array(json_encode((array) $component), $js),
+  array('"$component$"', '"$js$"', '"$samples$"'),
+  array(json_encode((array) $component), $js, $samples),
   file_get_contents('./performance.min.js')
 ); ?></script>
 </body>

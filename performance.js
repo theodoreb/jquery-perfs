@@ -3,7 +3,7 @@ if (window['performance']) {
     "use strict";
     setTimeout(function () {
       var
-        minData = 20,
+        minData = "$samples$",
         json, n, nl,
         c = "$component$",
         body = document.body,
@@ -17,17 +17,27 @@ if (window['performance']) {
         ],
         data = {};
 
-      function sum (a, b) {return a + b;}
+      function sum (a, b) {
+        return a + b;
+      }
+      function excludeMobile(a) {
+        if (a > 2000) {
+          return false;
+        }
+        return a;
+      }
 
       function print (el, data) {
+        var filC = oldC.filter(excludeMobile);
+        var filRaw = oldRaw.filter(excludeMobile);
         el.innerHTML = [
           '<h2 style="font-size:50px">', c.join(', ') , '</h2>',
           '<ul style="list-style:none;margin:0;padding:0;">',
             //'<li>', data.domContentLoadedEventEnd - data.domContentLoadedEventStart, '&thinsp;ms</li>',
             //'<li>', data.domComplete - data.domContentLoadedEventStart, '&thinsp;ms</li>',
             '<li style="color:gray">', data.domComplete, '&thinsp;ms</li>',
-            '<li>', (oldC.length && oldRaw.length) ?
-              Math.round(oldC.reduce(sum) / oldC.length - oldRaw.reduce(sum) / oldRaw.length) + '&thinsp;ms' :
+            '<li>', (filRaw.length && filC.length) ?
+              Math.round(filC.reduce(sum) / filC.length - filRaw.reduce(sum) / filRaw.length) + '&thinsp;ms' :
               'N/A', '</li>',
             //'<li><button type="button" onclick="window.location.reload();" style="font-weight:bold;font-size:20px;">RELOAD</button></li>',
           '</ul>',
