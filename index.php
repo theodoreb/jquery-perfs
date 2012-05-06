@@ -10,41 +10,23 @@ function load($c) {
 
 
 $tests = array(
-  //'raw' => array('raw'),
   'jquery' => array('jquery.min'),
-  //'jquery-cache' => array('cache', 'jquery.min'),
   'sizzle' => array('sizzle.min'),
-  //'sizzle-cache' => array('cache', 'sizzle.min'),
   'core' => array('core.min'),
-  //'core-cache' => array('cache', 'core.min'),
   'ajax' => array('core.min', 'ajax.min'),
-  //'ajax-cache' => array('cache', 'core.min', 'ajax.min'),
   'attributes' => array('core.min', 'callbacks.min', 'support.min', 'attributes.min'),
-  //'attributes-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'attributes.min'),
   'callbacks' => array('core.min', 'callbacks.min'),
-  //'callbacks-cache' => array('cache', 'core.min', 'callbacks.min'),
   'css' => array('core.min', 'callbacks.min', 'support.min', 'css.min'),
-  //'css-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'css.min'),
   'data' => array('core.min', 'data.min'),
-  //'data-cache' => array('cache', 'core.min', 'data.min'),
   'deferred' => array('core.min', 'deferred.min'),
-  //'deferred-cache' => array('cache', 'core.min', 'deferred.min'),
   'dimensions' => array('core.min', 'dimensions.min'),
-  //'dimensions-cache' => array('cache', 'core.min', 'dimensions.min'),
   'effects' => array('core.min', 'callbacks.min', 'effects.min'),
-  //'effects-cache' => array('cache', 'core.min', 'callbacks.min', 'effects.min'),
   'event' => array('core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
-  //'event-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
   'manipulation' => array('core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
-  //'manipulation-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
   'offset' => array('core.min', 'offset.min'),
-  //'offset-cache' => array('cache', 'core.min', 'offset.min'),
   'queue' => array('core.min', 'queue.min'),
-  //'queue-cache' => array('cache', 'core.min', 'queue.min'),
   'support' => array('core.min', 'callbacks.min', 'support.min'),
-  //'support-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min'),
-  //'traversing' => array('core.min', 'traversing.min'),
-  //'traversing-cache' => array('cache', 'core.min', 'traversing.min'),
+  'traversing' => array('core.min', 'traversing.min'),
 );
 
 
@@ -78,7 +60,6 @@ $tests = array(
 
     var scripts = document.querySelectorAll('script[id]'),
         log = document.querySelector('#log'),
-        start,
         scache = {},
         results = {};
 
@@ -93,9 +74,9 @@ $tests = array(
     }
 
     suite = new Benchmark.Suite;
-    for (var n in scache) {
+    for (var n in scache) { if (n === 'traversing') {
       suite.add(n, addTest(scache[n]));
-    }
+    }}
     suite.on('cycle', function (e) {
       var t = e.target;
       log.innerHTML += '<tr><td>' + t.name +'</td><td>'+ (t.stats.mean*1000).toFixed(8).replace('.', ',') + '</td><td>' + (t.stats.moe*1000).toFixed(8).replace('.',',') + '</td></tr>';
