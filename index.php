@@ -1,14 +1,5 @@
 <?php
 
-// build query string for scripts.php
-function qs($comp) {
-  $s = array();
-  foreach ((array) $comp as $c) {
-    $s[] = "c[]=$c";
-  }
-  return $s;
-}
-
 function load($c) {
   $path = './jquery/' . $c . '.js';
   if (file_exists($path)) {
@@ -18,48 +9,42 @@ function load($c) {
 }
 
 
-$component = !empty($_GET['c']) ? $_GET['c'] : 'raw';
-$query = qs($component);
-$samples = !empty($_GET['s']) ? $_GET['s'] : 0;
-$js = !empty($_GET['no_js']) && $_GET['no_js'] == 1 ? 0 : 1;
-
-
 $tests = array(
-  'raw' => array('raw'),
+  //'raw' => array('raw'),
   'jquery' => array('jquery.min'),
-  'jquery-cache' => array('cache', 'jquery.min'),
+  //'jquery-cache' => array('cache', 'jquery.min'),
   'sizzle' => array('sizzle.min'),
-  'sizzle-cache' => array('cache', 'sizzle.min'),
+  //'sizzle-cache' => array('cache', 'sizzle.min'),
   'core' => array('core.min'),
-  'core-cache' => array('cache', 'core.min'),
+  //'core-cache' => array('cache', 'core.min'),
   'ajax' => array('core.min', 'ajax.min'),
-  'ajax-cache' => array('cache', 'core.min', 'ajax.min'),
+  //'ajax-cache' => array('cache', 'core.min', 'ajax.min'),
   'attributes' => array('core.min', 'callbacks.min', 'support.min', 'attributes.min'),
-  'attributes-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'attributes.min'),
+  //'attributes-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'attributes.min'),
   'callbacks' => array('core.min', 'callbacks.min'),
-  'callbacks-cache' => array('cache', 'core.min', 'callbacks.min'),
+  //'callbacks-cache' => array('cache', 'core.min', 'callbacks.min'),
   'css' => array('core.min', 'callbacks.min', 'support.min', 'css.min'),
-  'css-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'css.min'),
+  //'css-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'css.min'),
   'data' => array('core.min', 'data.min'),
-  'data-cache' => array('cache', 'core.min', 'data.min'),
+  //'data-cache' => array('cache', 'core.min', 'data.min'),
   'deferred' => array('core.min', 'deferred.min'),
-  'deferred-cache' => array('cache', 'core.min', 'deferred.min'),
+  //'deferred-cache' => array('cache', 'core.min', 'deferred.min'),
   'dimensions' => array('core.min', 'dimensions.min'),
-  'dimensions-cache' => array('cache', 'core.min', 'dimensions.min'),
+  //'dimensions-cache' => array('cache', 'core.min', 'dimensions.min'),
   'effects' => array('core.min', 'callbacks.min', 'effects.min'),
-  'effects-cache' => array('cache', 'core.min', 'callbacks.min', 'effects.min'),
+  //'effects-cache' => array('cache', 'core.min', 'callbacks.min', 'effects.min'),
   'event' => array('core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
-  'event-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
+  //'event-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
   'manipulation' => array('core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
-  'manipulation-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
+  //'manipulation-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
   'offset' => array('core.min', 'offset.min'),
-  'offset-cache' => array('cache', 'core.min', 'offset.min'),
+  //'offset-cache' => array('cache', 'core.min', 'offset.min'),
   'queue' => array('core.min', 'queue.min'),
-  'queue-cache' => array('cache', 'core.min', 'queue.min'),
+  //'queue-cache' => array('cache', 'core.min', 'queue.min'),
   'support' => array('core.min', 'callbacks.min', 'support.min'),
-  'support-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min'),
-  'traversing' => array('core.min', 'traversing.min'),
-  'traversing-cache' => array('cache', 'core.min', 'traversing.min'),
+  //'support-cache' => array('cache', 'core.min', 'callbacks.min', 'support.min'),
+  //'traversing' => array('core.min', 'traversing.min'),
+  //'traversing-cache' => array('cache', 'core.min', 'traversing.min'),
 );
 
 
@@ -68,40 +53,59 @@ $tests = array(
 <head>
   <meta charset="utf8">
   <title>jQuery perf rundown</title>
+
   <?php
-  if (!empty($query) && $component !== 'raw') {
 
-    $cache = !empty($_GET['cache']);
+  foreach ($tests  as $id => $test) {
+    print '<script type="text/cache" id="'. $id . '">';
+    foreach ($test as $script) {
+      print "\n//$script\n" . load($script);
+    }
+    print "\n</script>\n";
+  }
 
-    print '<script ' . (in_array('cache', (array) $component) ? 'type="text/cache"' : '') . '>';
+   ?>
+</head>
+<body>
+<table style="margin:50px">
+  <thead><tr><th>component</th><th>mean (ms)</th><th>error (ms)</th></tr></thead>
+  <tbody id="log"></tbody>
+</table>
+<script src="benchmark.js"></script>
+<script>
+  var suite;
+  window.addEventListener('load', function () {
 
-    if ($component !== 'raw') {
-      foreach ((array) $component as $c) {
-        if ($c !== 'cache') {
-          print "\n//$c\n" . load($c);
-        }
+    var scripts = document.querySelectorAll('script[id]'),
+        log = document.querySelector('#log'),
+        start,
+        scache = {},
+        results = {};
+
+    function addTest(code) {
+      return function () {
+        eval(code);
       }
     }
 
-    print '</script>';
+    for (var i = 0, il = scripts.length; i < il; i += 1) {
+      scache[scripts[i].id] = scripts[i].innerHTML;
+    }
 
-  }
-  ?>
-</head>
-<body style="text-align:center;margin-top:20px;line-height:2;font-size:18px;">
+    suite = new Benchmark.Suite;
+    for (var n in scache) {
+      suite.add(n, addTest(scache[n]));
+    }
+    suite.on('cycle', function (e) {
+      var t = e.target;
+      log.innerHTML += '<tr><td>' + t.name +'</td><td>'+ (t.stats.mean*1000).toFixed(8).replace('.', ',') + '</td><td>' + (t.stats.moe*1000).toFixed(8).replace('.',',') + '</td></tr>';
+    });
+    suite.on('complete', function() {
+      //console.log('end');
+    });
+    suite.run({async: true});
 
-<?php
-$links = array();
-foreach ($tests as $id => $t) {
-  $links[] = '<a id="' . $id . '" href="?' . implode('&', qs($t)) . '">' . $id . '</a>';
-}
-print implode(' | ', $links);
-?>
-<div id="log" style="text-align:center;font-size:100px;font:georgia;margin:50px"><h2>…</h2></div>
-<script><?php print str_replace(
-  array('"$component$"', '"$samples$"'),
-  array(json_encode((array) $component), $samples),
-  file_get_contents('./performance.min.js')
-); ?></script>
+  }, false);
+</script>
 </body>
 </html>
