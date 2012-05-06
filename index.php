@@ -26,7 +26,7 @@ $tests = array(
   'offset' => array('core.min', 'offset.min'),
   'queue' => array('core.min', 'queue.min'),
   'support' => array('core.min', 'callbacks.min', 'support.min'),
-  'traversing' => array('core.min', 'traversing.min'),
+  'traversing' => array('core.min', 'sizzle.min', 'sizzle-jquery.min', 'traversing.min'),
 );
 
 
@@ -39,29 +39,32 @@ $tests = array(
   <?php
 
   foreach ($tests  as $id => $test) {
-    print '<script type="text/cache" id="'. $id . '">';
-    foreach ($test as $script) {
-      print "\n//$script\n" . load($script);
-    }
+    print '<script id="'. $id . '">';
+    print "\n//$id\n" . load($id . '.min');
+    //foreach ($test as $script) {
+    //  print "\n//$script\n" . load($id . '.min');
+    //}
     print "\n</script>\n";
   }
 
    ?>
 </head>
 <body>
-<table style="margin:50px">
-  <thead><tr><th>component</th><th>mean (ms)</th><th>error (ms)</th></tr></thead>
-  <tbody id="log"></tbody>
-</table>
+<ul id="comp" style="margin:50px;list-style:none;"><li><strong>component</strong></li></ul>
+<ul id="mean" style="margin:50px;list-style:none;"><li><strong>mean (ms)</strong></li></ul>
+<ul id="error" style="margin:50px;list-style:none;"><li><strong>error (ms)</strong></li></ul>
 <script src="benchmark.js"></script>
 <script>
-  var suite;
-  window.addEventListener('load', function () {
+  function benchOnload () {
 
     var scripts = document.querySelectorAll('script[id]'),
-        log = document.querySelector('#log'),
+        comp = document.querySelector('#comp'),
+        mean = document.querySelector('#mean'),
+        error = document.querySelector('#error'),
         scache = {},
         results = {};
+
+    var suite;
 
     function addTest(code) {
       return function () {
@@ -74,19 +77,29 @@ $tests = array(
     }
 
     suite = new Benchmark.Suite;
-    for (var n in scache) { if (n === 'traversing') {
+
+    for (var n in scache) {
       suite.add(n, addTest(scache[n]));
-    }}
+    }
     suite.on('cycle', function (e) {
       var t = e.target;
-      log.innerHTML += '<tr><td>' + t.name +'</td><td>'+ (t.stats.mean*1000).toFixed(8).replace('.', ',') + '</td><td>' + (t.stats.moe*1000).toFixed(8).replace('.',',') + '</td></tr>';
+      comp.innerHTML += '<li>' + t.name + '</li>';
+      mean.innerHTML += '<li>' + (t.stats.mean*1000).toFixed(2).replace('.', ',') + '</li>';
+      error.innerHTML += '<li>' + (t.stats.moe*1000).toFixed(2).replace('.', ',') + '</li>';
     });
     suite.on('complete', function() {
       //console.log('end');
     });
-    suite.run({async: true});
 
-  }, false);
+    suite.run({async: true});
+  }
+
+  if (window.addEventListener) {
+    window.addEventListener('load', benchOnload, false);
+  }
+  else {
+    window.attachEvent('onload', benchOnload);
+  }
 </script>
 </body>
 </html>
