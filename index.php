@@ -43,7 +43,6 @@ function load($c) {
 <head>
   <meta charset="utf8">
   <title>jQuery perf rundown</title>
-
   <!--
 
     jQuery is loaded to make everything available to the jQuery part we're currently testing.
@@ -59,7 +58,14 @@ function load($c) {
   </script>
   <?php endforeach; ?>
 
-  <style>ul {margin:20px;list-style:none;float:left;}</style>
+  <style>
+    body {color:#555753;}
+    table {margin:20px auto;border-collapse:collapse;}
+    tr:first-child {border-bottom:1px solid #d3d7cf;font-weight:bold;}
+    tr:hover {color:#2e3436;background:#eeeeec;}
+    td {padding:5px;text-align:right;}
+    td:first-child {text-align:left;}
+  </style>
 </head>
 <body>
 <script src="jquery-bench.js"></script>
