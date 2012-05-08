@@ -1,15 +1,12 @@
 <?php
 
-function load($c) {
-  $path = './jquery/' . $c . '.js';
-  if (file_exists($path)) {
-    return file_get_contents($path);
-  }
-  return '';
-}
-
-
-$tests = array(
+/**
+ * This is the dependency array of the different jQuery parts.
+ *
+ * Each batch of files will load without error. I'm only interested about the loading,
+ * I'm not trying to split everything and have it working properly.
+ */
+$dependencies = array(
   'jquery' => array('jquery.min'),
   'sizzle' => array('sizzle.min'),
   'core' => array('core.min'),
@@ -29,6 +26,18 @@ $tests = array(
   'traversing' => array('core.min', 'sizzle.min', 'sizzle-jquery.min', 'traversing.min'),
 );
 
+// Easier for copy/paste.
+ksort($dependencies);
+
+// Helper.
+function load($c) {
+  $path = './jquery/' . $c . '.js';
+  if (file_exists($path)) {
+    return file_get_contents($path);
+  }
+  return '';
+}
+
 
 ?><!doctype html>
 <html>
@@ -36,61 +45,59 @@ $tests = array(
   <meta charset="utf8">
   <title>jQuery perf rundown</title>
 
-  <?php
+  <?php foreach ($dependencies  as $script => $dependencies): ?>
+  <script type="text/cache" id="<?php print $script; ?>">
+    <?php print load($script . '.min'); ?>
+  </script>
+  <?php endforeach; ?>
 
-  foreach ($tests  as $id => $test) {
-    print '<script id="'. $id . '">';
-    print "\n//$id\n" . load($id . '.min');
-    //foreach ($test as $script) {
-    //  print "\n//$script\n" . load($id . '.min');
-    //}
-    print "\n</script>\n";
-  }
-
-   ?>
+  <style>ul {margin:20px;list-style:none;float:left;}</style>
 </head>
 <body>
-<ul id="comp" style="margin:50px;list-style:none;"><li><strong>component</strong></li></ul>
-<ul id="mean" style="margin:50px;list-style:none;"><li><strong>mean (ms)</strong></li></ul>
-<ul id="error" style="margin:50px;list-style:none;"><li><strong>error (ms)</strong></li></ul>
-<script src="benchmark.js"></script>
+<ul id="comp"><li><strong>component</strong></li></ul>
+<ul id="mean"><li><strong>mean (ms)</strong></li></ul>
+<ul id="error"><li><strong>error (ms)</strong></li></ul>
+<!--
+
+  jQuery is loaded to make everything available to the jQuery part we're currently testing.
+  This allow for meaningful error margin of benchmark.js for each part of jQuery.
+
+-->
+<script src="jquery/jquery.min.js"></script>
+<script src="benchmark.min.js"></script>
 <script>
+(function () {
+  var
+    log = document.querySelector('#log'),
+    comp = document.querySelector('#comp'),
+    mean = document.querySelector('#mean'),
+    error = document.querySelector('#error');
+
+
+  function cycle (e) {
+    var t = e.target;
+    comp.innerHTML += '<li>' + t.name + '</li>';
+    mean.innerHTML += '<li>' + (t.stats.mean*1000).toFixed(2).replace('.', ',') + '</li>';
+    error.innerHTML += '<li>' + (t.stats.moe*1000).toFixed(2).replace('.', ',') + '</li>';
+  }
+
+  function addTest (code) {
+    return function () {
+      // Add a random operation to avoid caching.
+      eval(code + '; "' + Math.random() +'";');
+    }
+  }
+
   function benchOnload () {
+    var
+      scripts = document.querySelectorAll('script[id]'),
+      suite = new Benchmark.Suite({'onCycle': cycle});
 
-    var scripts = document.querySelectorAll('script[id]'),
-        comp = document.querySelector('#comp'),
-        mean = document.querySelector('#mean'),
-        error = document.querySelector('#error'),
-        scache = {},
-        results = {};
-
-    var suite;
-
-    function addTest(code) {
-      return function () {
-        eval(code);
-      }
-    }
-
+    // Get all the scripts.
     for (var i = 0, il = scripts.length; i < il; i += 1) {
-      scache[scripts[i].id] = scripts[i].innerHTML;
+      suite.add(scripts[i].id, addTest(scripts[i].innerHTML));
     }
-
-    suite = new Benchmark.Suite;
-
-    for (var n in scache) {
-      suite.add(n, addTest(scache[n]));
-    }
-    suite.on('cycle', function (e) {
-      var t = e.target;
-      comp.innerHTML += '<li>' + t.name + '</li>';
-      mean.innerHTML += '<li>' + (t.stats.mean*1000).toFixed(2).replace('.', ',') + '</li>';
-      error.innerHTML += '<li>' + (t.stats.moe*1000).toFixed(2).replace('.', ',') + '</li>';
-    });
-    suite.on('complete', function() {
-      //console.log('end');
-    });
-
+    // Async otherwise browser hangs.
     suite.run({async: true});
   }
 
@@ -100,6 +107,7 @@ $tests = array(
   else {
     window.attachEvent('onload', benchOnload);
   }
+}());
 </script>
 </body>
 </html>
