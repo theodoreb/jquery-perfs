@@ -7,26 +7,25 @@
  * I'm not trying to split everything and have it working properly.
  */
 $dependencies = array(
-  'jquery' => array('jquery.min'),
-  'sizzle' => array('sizzle.min'),
-  'core' => array('core.min'),
-  'ajax' => array('core.min', 'ajax.min'),
-  'attributes' => array('core.min', 'callbacks.min', 'support.min', 'attributes.min'),
-  'callbacks' => array('core.min', 'callbacks.min'),
-  'css' => array('core.min', 'callbacks.min', 'support.min', 'css.min'),
-  'data' => array('core.min', 'data.min'),
-  'deferred' => array('core.min', 'deferred.min'),
-  'dimensions' => array('core.min', 'dimensions.min'),
-  'effects' => array('core.min', 'callbacks.min', 'effects.min'),
-  'event' => array('core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
-  'manipulation' => array('core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
-  'offset' => array('core.min', 'offset.min'),
-  'queue' => array('core.min', 'queue.min'),
-  'support' => array('core.min', 'callbacks.min', 'support.min'),
-  'traversing' => array('core.min', 'sizzle.min', 'sizzle-jquery.min', 'traversing.min'),
+  'core'          => array('core.min'),
+  'jquery'        => array('jquery.min'),
+  'sizzle'        => array('sizzle.min'),
+  'ajax'          => array('core.min', 'ajax.min'),
+  'callbacks'     => array('core.min', 'callbacks.min'),
+  'data'          => array('core.min', 'data.min'),
+  'deferred'      => array('core.min', 'deferred.min'),
+  'dimensions'    => array('core.min', 'dimensions.min'),
+  'offset'        => array('core.min', 'offset.min'),
+  'queue'         => array('core.min', 'queue.min'),
+  'effects'       => array('core.min', 'callbacks.min', 'effects.min'),
+  'support'       => array('core.min', 'callbacks.min', 'support.min'),
+  'attributes'    => array('core.min', 'callbacks.min', 'support.min', 'attributes.min'),
+  'css'           => array('core.min', 'callbacks.min', 'support.min', 'css.min'),
+  'manipulation'  => array('core.min', 'callbacks.min', 'support.min', 'manipulation.min'),
+  'traversing'    => array('core.min', 'sizzle.min',    'sizzle-jquery.min', 'traversing.min'),
+  'event'         => array('core.min', 'callbacks.min', 'support.min', 'data.min', 'event.min'),
 );
 
-// Easier for copy/paste.
 ksort($dependencies);
 
 // Helper.
@@ -54,9 +53,6 @@ function load($c) {
   <style>ul {margin:20px;list-style:none;float:left;}</style>
 </head>
 <body>
-<ul id="comp"><li><strong>component</strong></li></ul>
-<ul id="mean"><li><strong>mean (ms)</strong></li></ul>
-<ul id="error"><li><strong>error (ms)</strong></li></ul>
 <!--
 
   jQuery is loaded to make everything available to the jQuery part we're currently testing.
@@ -68,20 +64,26 @@ function load($c) {
 <script>
 (function () {
   var
-    log = document.querySelector('#log'),
-    comp = document.querySelector('#comp'),
-    mean = document.querySelector('#mean'),
-    error = document.querySelector('#error');
+    parent = document.body,
+    text = function (element, text) { var txt = document.createTextNode(text); element.appendChild(txt); },
+    table = document.createElement('table'),
+    head = table.createTHead().insertRow(0);
 
+  text(head.insertCell(-1), 'Component');
+  text(head.insertCell(-1), 'Mean (ms)');
+  text(head.insertCell(-1), 'Error (ms)');
+
+  parent.appendChild(table);
 
   function cycle (e) {
     var t = e.target;
-    comp.innerHTML += '<li>' + t.name + '</li>';
-    mean.innerHTML += '<li>' + (t.stats.mean*1000).toFixed(2).replace('.', ',') + '</li>';
-    error.innerHTML += '<li>' + (t.stats.moe*1000).toFixed(2).replace('.', ',') + '</li>';
+    var row = table.insertRow(-1);
+    text(row.insertCell(-1), t.name);
+    text(row.insertCell(-1), (t.stats.mean*1000).toFixed(2).replace('.', ','));
+    text(row.insertCell(-1), (t.stats.moe*1000).toFixed(2).replace('.', ','));
   }
 
-  function addTest (code) {
+  function wrapEvalTest (code) {
     return function () {
       // Add a random operation to avoid caching.
       eval(code + '; "' + Math.random() +'";');
@@ -95,7 +97,7 @@ function load($c) {
 
     // Get all the scripts.
     for (var i = 0, il = scripts.length; i < il; i += 1) {
-      suite.add(scripts[i].id, addTest(scripts[i].innerHTML));
+      suite.add(scripts[i].id, wrapEvalTest(scripts[i].innerHTML));
     }
     // Async otherwise browser hangs.
     suite.run({async: true});
