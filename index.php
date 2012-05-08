@@ -65,9 +65,9 @@ function load($c) {
 (function () {
   var
     parent = document.body,
-    text = function (element, text) { var txt = document.createTextNode(text); element.appendChild(txt); },
     table = document.createElement('table'),
-    head = table.createTHead().insertRow(0);
+    head = table.insertRow(-1),
+    text = function (element, text) { var txt = document.createTextNode(text); element.appendChild(txt); };
 
   text(head.insertCell(-1), 'Component');
   text(head.insertCell(-1), 'Mean (ms)');
@@ -76,11 +76,14 @@ function load($c) {
   parent.appendChild(table);
 
   function cycle (e) {
-    var t = e.target;
-    var row = table.insertRow(-1);
+    var
+      t = e.target,
+      row = table.insertRow(-1);
+
+    row.id = 'result-' + t.name;
     text(row.insertCell(-1), t.name);
     text(row.insertCell(-1), (t.stats.mean*1000).toFixed(2).replace('.', ','));
-    text(row.insertCell(-1), (t.stats.moe*1000).toFixed(2).replace('.', ','));
+    text(row.insertCell(-1), (t.stats.moe *1000).toFixed(2).replace('.', ','));
   }
 
   function wrapEvalTest (code) {
