@@ -52,11 +52,16 @@ function load($c) {
   <script src="jquery/jquery.min.js"></script>
   <script src="benchmark.min.js"></script>
 
-  <?php foreach ($dependencies  as $script => $dependencies): ?>
-  <script type="text/cache" id="<?php print $script; ?>">
-    <?php print load($script . '.min'); ?>
+  <?php
+
+  foreach ($dependencies  as $script => $dependencies) {
+    $scripts[$script] = load($script . '.min');
+  }
+  ?>
+
+  <script>
+    var scripts = <?php print json_encode($scripts/*, JSON_PRETTY_PRINT*/); ?>;
   </script>
-  <?php endforeach; ?>
 
   <style>
     body {color:#555753;}

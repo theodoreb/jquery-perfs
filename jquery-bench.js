@@ -30,13 +30,11 @@
   }
 
   function benchOnload () {
-    var
-      scripts = document.querySelectorAll('script[id]'),
-      suite = new Benchmark.Suite({'onCycle': cycle});
+    var suite = new Benchmark.Suite({'onCycle': cycle});
 
     // Get all the scripts.
-    for (var i = 0, il = scripts.length; i < il; i += 1) {
-      suite.add(scripts[i].id, wrapEvalTest(scripts[i].innerHTML));
+    for (var i in scripts) {
+      suite.add(i, wrapEvalTest(scripts[i]));
     }
     // Async otherwise browser hangs.
     suite.run({async: true});
